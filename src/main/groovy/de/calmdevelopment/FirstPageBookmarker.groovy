@@ -9,24 +9,29 @@ class FirstPageBookmarker implements Bookmarker{
     PDDocument document
     def bookmarkTitle
 
-    def FirstPageBookmarker(PDDocument destinationDocument, String title) {
-        this.document = destinationDocument
+    def FirstPageBookmarker(String title) {
         this.bookmarkTitle = title
     }
 
     @Override
     def bookmark() {
+        if ( document != null ) {
+            def documentOutline = new PDDocumentOutline()
+            this.document.getDocumentCatalog().documentOutline = documentOutline
 
-        def documentOutline = new PDDocumentOutline()
-        this.document.getDocumentCatalog().documentOutline = documentOutline
-
-        if ( document.getPages().size() > 0 ) {
-            def destination = new PDPageFitWidthDestination()
-            destination.setPage(document.getPages().get(0))
-            def bookmark = new PDOutlineItem()
-            bookmark.title = bookmarkTitle
-            bookmark.destination = destination
-            documentOutline.addLast(bookmark)
+            if (document.getPages().size() > 0) {
+                def destination = new PDPageFitWidthDestination()
+                destination.setPage(document.getPages().get(0))
+                def bookmark = new PDOutlineItem()
+                bookmark.title = bookmarkTitle
+                bookmark.destination = destination
+                documentOutline.addLast(bookmark)
+            }
         }
+    }
+
+    @Override
+    def addDocument(PDDocument document) {
+        this.document = document
     }
 }

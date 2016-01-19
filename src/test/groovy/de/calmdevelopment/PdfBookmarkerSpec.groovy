@@ -21,7 +21,8 @@ class PdfBookmarkerSpec extends Specification {
     def "shouldAddBookmarkToFirstPage"() {
         given:
         def bookmarkTitle = "Sample Document"
-        Bookmarker bookmarker = new FirstPageBookmarker(sampleDocument,bookmarkTitle);
+        Bookmarker bookmarker = new FirstPageBookmarker(bookmarkTitle);
+        bookmarker.addDocument(sampleDocument)
 
         when:
         bookmarker.bookmark()
