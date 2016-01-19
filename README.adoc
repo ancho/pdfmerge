@@ -1,0 +1,3 @@
+= pdfmerger
+
+A simple implementation to merger multiple PDF Documents.

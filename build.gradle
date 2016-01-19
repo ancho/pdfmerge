@@ -1,0 +1,27 @@
+apply plugin: 'groovy'
+apply plugin: 'idea'
+
+group 'de.calmdevelopment'
+version '0.1'
+
+defaultTasks 'clean', 'build', 'eclipse'
+
+repositories {
+	jcenter()
+}
+
+dependencies {
+	compile 'org.codehaus.groovy:groovy-all:2.4+'
+    compile 'org.apache.pdfbox:pdfbox:2.0+'
+	testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+}
+
+task openTestReport(type: Exec) {
+    description 'Open generated TestReport in your browser'
+    def reportDir = test.reports.html.destination
+
+    executable "/usr/bin/firefox"
+    args "file://${reportDir}/index.html"
+}
+
+
