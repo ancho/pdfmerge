@@ -56,13 +56,20 @@ class SampleDocumentBuilder {
         document.getDocumentCatalog().documentOutline = outline
         document.pages.eachWithIndex { page, index ->
 
-            def destination = new PDPageFitWidthDestination()
-            destination.setPage(page)
-            PDOutlineItem bookmark = new PDOutlineItem()
-            bookmark.title = "$pageMessage $index"
-            bookmark.destination = destination
+            PDOutlineItem bookmark = addBookmark(pageMessage, page, index)
+            def subBookmark = addBookmark("sub$pageMessage", page, index)
+            bookmark.addLast(subBookmark)
             outline.addLast(bookmark)
         }
         return document
+    }
+
+    private static PDOutlineItem addBookmark(pageMessage, PDPage page, int index) {
+        def destination = new PDPageFitWidthDestination()
+        destination.setPage(page)
+        PDOutlineItem bookmark = new PDOutlineItem()
+        bookmark.title = "$pageMessage $index"
+        bookmark.destination = destination
+        bookmark
     }
 }

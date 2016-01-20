@@ -19,6 +19,7 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitWidthDestination
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode
 
 class FirstPageBookmarker implements Bookmarker{
     PDDocument document
@@ -31,18 +32,50 @@ class FirstPageBookmarker implements Bookmarker{
     @Override
     def bookmark() {
         if ( document != null ) {
-            def documentOutline = new PDDocumentOutline()
-            this.document.getDocumentCatalog().documentOutline = documentOutline
 
             if (document.getPages().size() > 0) {
+
+                def originalOutline = this.document.documentCatalog.documentOutline
+                def newOutline = new PDDocumentOutline()
                 def destination = new PDPageFitWidthDestination()
-                destination.setPage(document.getPages().get(0))
                 def bookmark = new PDOutlineItem()
+
+                destination.setPage(document.getPages().get(0))
+
                 bookmark.title = bookmarkTitle
                 bookmark.destination = destination
-                documentOutline.addLast(bookmark)
+
+                if(originalOutline) {
+                    appendOriginalBookmarks(originalOutline, bookmark)
+                }
+
+                newOutline.addLast(bookmark)
+                document.documentCatalog.documentOutline = newOutline
             }
         }
+    }
+
+    private Iterable<PDOutlineItem> appendOriginalBookmarks(PDOutlineNode originalOutline, PDOutlineItem bookmark) {
+        originalOutline.children().each { oldBookmark ->
+            PDOutlineItem bookmarkClone = cloneBookmark(oldBookmark)
+
+            if(oldBookmark.children().size() > 0){
+                appendOriginalBookmarks(oldBookmark,bookmarkClone)
+            }
+            bookmark.addLast(bookmarkClone)
+        }
+    }
+
+    private PDOutlineItem cloneBookmark(PDOutlineItem bookmark) {
+        def bookmarkClone = new PDOutlineItem()
+        bookmarkClone.title = bookmark.title
+        bookmarkClone.destination = bookmark.destination
+        bookmarkClone.action = bookmark.action
+        bookmarkClone.structuredElement = bookmark.getStructureElement()
+        bookmarkClone.bold = bookmark.bold
+        bookmarkClone.italic = bookmark.italic
+        bookmarkClone.textColor = bookmark.textColor
+        bookmarkClone
     }
 
     @Override

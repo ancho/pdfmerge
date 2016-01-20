@@ -17,6 +17,7 @@ package de.calmdevelopment
 
 import de.calmdevelopment.helper.SampleDocumentBuilder
 import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -44,7 +45,7 @@ class PdfMergerIntegrationSpec extends Specification {
         PdfMerger merger = new PdfMerger()
 
         merger.addSource(new FileInputStream(firstFile), new FirstPageBookmarker("First Document"))
-        merger.addSource(new FileInputStream(allpagesFile))
+        merger.addSource(new FileInputStream(allpagesFile), new FirstPageBookmarker("Second Document"))
         merger.destination = new FileOutputStream(destination)
 
         when:
@@ -56,8 +57,17 @@ class PdfMergerIntegrationSpec extends Specification {
         PDDocument document = PDDocument.load(new FileInputStream(destination))
 
         document.pages.size() == 6
-        document.documentCatalog.documentOutline.children().size() == 5
 
+        def outlineRoot = document.documentCatalog.documentOutline
+        hasValidNumberOfChildren(outlineRoot, 2)
+        def secondBookmark = outlineRoot.children().getAt(1)
+        hasValidNumberOfChildren(secondBookmark, 4)
+        def subBookmarkOfSecondBookmark = secondBookmark.getFirstChild()
+        hasValidNumberOfChildren(subBookmarkOfSecondBookmark, 1)
+    }
+
+    private boolean hasValidNumberOfChildren(PDOutlineNode node, expectedSize) {
+        node.children().size() == expectedSize
     }
 
 

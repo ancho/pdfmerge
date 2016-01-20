@@ -19,7 +19,7 @@ import de.calmdevelopment.helper.SampleDocumentBuilder
 import org.apache.pdfbox.pdmodel.PDDocument
 import spock.lang.Specification
 
-class PdfBookmarkerSpec extends Specification {
+class FirstPageBookmarkerSpec extends Specification {
     private ByteArrayOutputStream outputStream
     private PDDocument sampleDocument
 
@@ -51,4 +51,21 @@ class PdfBookmarkerSpec extends Specification {
         loaded.getDocumentCatalog().getDocumentOutline() != null
     }
 
+    def "should preserve original outline"() {
+        given:
+        sampleDocument = SampleDocumentBuilder.createDocumentWithBookmarks("Original", 4)
+        Bookmarker bookmarker = new FirstPageBookmarker("Bookmarked Page")
+        bookmarker.addDocument(sampleDocument)
+
+        when:
+        bookmarker.bookmark()
+
+        then:
+        def firstBookmer = sampleDocument.getDocumentCatalog().getDocumentOutline().getFirstChild()
+        def firstOriginalBookmark = firstBookmer.getFirstChild()
+
+        firstBookmer.title == "Bookmarked Page"
+        firstOriginalBookmark.title == "Original 0"
+        firstOriginalBookmark.getFirstChild().title == "subOriginal 0"
+    }
 }

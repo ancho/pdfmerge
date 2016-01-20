@@ -21,6 +21,9 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlin
 import spock.lang.Specification
 
 class PdfMergerSpec extends Specification {
+    public static final String FIRST_DOCUMENT_TITLE = "First Document"
+    public static final String SECOND_DOCUMENT_TITLE = "Second Document"
+    public static final String BOOKMARKED_PAGE_TITLE = "Bookmarked Page"
     private ByteArrayOutputStream fistDocumentOutputStream
     private ByteArrayOutputStream secondDocumentOutputStream
     private ByteArrayOutputStream allPagesOutputStream
@@ -35,10 +38,10 @@ class PdfMergerSpec extends Specification {
         allPagesOutputStream = new ByteArrayOutputStream()
         destinationStream = new ByteArrayOutputStream()
 
-        firstDocument = SampleDocumentBuilder.createDocument("First Documemt", 2)
-        secondDocument = SampleDocumentBuilder.createDocument("Second Document", 3)
+        firstDocument = SampleDocumentBuilder.createDocument(FIRST_DOCUMENT_TITLE, 2)
+        secondDocument = SampleDocumentBuilder.createDocument(SECOND_DOCUMENT_TITLE, 3)
 
-        allpagesBookmarkedDocument = SampleDocumentBuilder.createDocumentWithBookmarks("Bookmarked Document", 4)
+        allpagesBookmarkedDocument = SampleDocumentBuilder.createDocumentWithBookmarks(BOOKMARKED_PAGE_TITLE, 4)
         firstDocument.save(fistDocumentOutputStream)
         secondDocument.save(secondDocumentOutputStream)
         allpagesBookmarkedDocument.save(allPagesOutputStream)
@@ -58,8 +61,8 @@ class PdfMergerSpec extends Specification {
     def "should merge documents and apply bookmarker"() {
         given:
         PdfMerger merger = new PdfMerger()
-        merger.addSource(new ByteArrayInputStream(fistDocumentOutputStream.toByteArray()), new FirstPageBookmarker("First Document"))
-        merger.addSource(new ByteArrayInputStream(secondDocumentOutputStream.toByteArray()), new FirstPageBookmarker("Second Document"))
+        merger.addSource(asInputStream(fistDocumentOutputStream), new FirstPageBookmarker(FIRST_DOCUMENT_TITLE))
+        merger.addSource(asInputStream(secondDocumentOutputStream), new FirstPageBookmarker(SECOND_DOCUMENT_TITLE))
         merger.destination = destinationStream
 
         when:
@@ -70,16 +73,16 @@ class PdfMergerSpec extends Specification {
         expectedDocument.getPages().size() == 5
 
         PDOutlineItem firstBookmark = expectedDocument.getDocumentCatalog().getDocumentOutline().getFirstChild()
-        firstBookmark.getTitle() == "First Document"
-
-        firstBookmark.getNextSibling().getTitle() == "Second Document"
+        firstBookmark.getTitle() == FIRST_DOCUMENT_TITLE
+        firstBookmark.getNextSibling().getTitle() == SECOND_DOCUMENT_TITLE
     }
 
     def "should preserve bookmarks from sources"() {
         given:
         PdfMerger merger = new PdfMerger()
-        merger.addSource(new ByteArrayInputStream(fistDocumentOutputStream.toByteArray()), new FirstPageBookmarker("First Document"))
-        merger.addSource(new ByteArrayInputStream(allPagesOutputStream.toByteArray()))
+        merger.addSource(asInputStream(fistDocumentOutputStream), new FirstPageBookmarker(FIRST_DOCUMENT_TITLE))
+        merger.addSource(asInputStream(allPagesOutputStream), new FirstPageBookmarker(SECOND_DOCUMENT_TITLE))
+        merger.addSource(asInputStream(allPagesOutputStream))
         merger.destination = destinationStream
 
         when:
@@ -87,12 +90,17 @@ class PdfMergerSpec extends Specification {
 
         then:
         def expectedDocument = PDDocument.load(new ByteArrayInputStream(destinationStream.toByteArray()))
-        expectedDocument.getPages().size() == 6
-        expectedDocument.getDocumentCatalog().documentOutline.children().size() == 5
-        expectedDocument.save(new File("/tmp/preservedBookmarks.pdf"))
+        expectedDocument.getPages().size() == 10
+        expectedDocument.getDocumentCatalog().documentOutline.children().size() == 6
 
         def firstChild = expectedDocument.getDocumentCatalog().documentOutline.firstChild
-        firstChild.getTitle() == "First Document"
-        firstChild.nextSibling.getTitle() == "Bookmarked Document 0"
+        firstChild.getTitle() == FIRST_DOCUMENT_TITLE
+        firstChild.nextSibling.getTitle() == SECOND_DOCUMENT_TITLE
+        firstChild.nextSibling.children().size() == 4
+        firstChild.nextSibling.nextSibling.title == "$BOOKMARKED_PAGE_TITLE 0"
+    }
+
+    private ByteArrayInputStream asInputStream(ByteArrayOutputStream outputStream) {
+        new ByteArrayInputStream(outputStream.toByteArray())
     }
 }
