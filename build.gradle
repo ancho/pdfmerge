@@ -1,7 +1,12 @@
+plugins {
+    id "com.github.hierynomus.license" version "0.12.1"
+}
+
 apply plugin: 'groovy'
 apply plugin: 'idea'
 apply plugin: 'jacoco'
 apply from: 'gradle/maven-publish.gradle'
+apply from: 'gradle/codequality.gradle'
 
 group 'de.calmdevelopment'
 version '0.1-SNAPSHOT'

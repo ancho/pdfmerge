@@ -1,0 +1,4 @@
+license {
+    header file('gradle/codequality/LICENSE.header')
+    strictCheck true
+}

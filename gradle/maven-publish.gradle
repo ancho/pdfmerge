@@ -6,7 +6,6 @@ def slurper = new ConfigSlurper()
 slurper.setBinding(["projectName": project.name])
 def config = slurper.parse(pomFile.toURI().toURL())
 
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
