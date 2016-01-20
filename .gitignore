@@ -3,3 +3,5 @@
 .lazybones
 build/
 *.iml
+*.ipr
+*.iws

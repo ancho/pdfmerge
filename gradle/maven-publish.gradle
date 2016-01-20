@@ -1,57 +1,35 @@
-import groovy.xml.StreamingMarkupBuilder
-
 apply plugin: 'maven-publish'
 
-def xml = new StreamingMarkupBuilder().bind {
-    base {
-        name project.name
-        developers {
-            developer {
-                id "ancho"
-                name "Frank Becker"
-                email "frank@calmdevelopment.de"
-                url "https://calmdevelopment.de"
-                timezone "Europe/Berlin"
-                roles {
-                    role "developer"
-                }
-            }
-        }
+def pomFile = file("gradle/pom.groovy")
+assert pomFile.exists()
+def slurper = new ConfigSlurper()
+slurper.setBinding(["projectName": project.name])
+def config = slurper.parse(pomFile.toURI().toURL())
 
-        licenses {
-            license {
-                name "Apache License, Version 2.0"
-                url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                distribution "repo"
-            }
-        }
-
-        scm {
-            url "https://github.com/ancho/pdfmerge/"
-            connection "scm:git:git@github.com:ancho/pdfmerge.git"
-            developerConnection "scm:git:https://github.com/ancho/pdfmerge.git"
-        }
-
-        issueManagement{
-            system "GitHub Issues"
-            url "https://github.com/ancho/pdfmerge/issues"
-        }
-    }
-}
-
-def base = new XmlParser().parseText(xml.toString())
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
 
             pom.withXml {
-                base.children().each {
-                    asNode().append(it)
+                def rootNode = asNode()
+                config.keySet().each { key ->
+                    addNode(config, key, rootNode)
                 }
             }
-
             from components.java
+        }
+    }
+}
+
+private void addNode(config, key, Node node) {
+    if (!(config[key] instanceof Map)) {
+        node.appendNode(key, config[key])
+    }
+    else {
+        Node newNode = new Node(node,key)
+        config[key].keySet().each{
+            addNode(config[key],it,newNode)
         }
     }
 }
