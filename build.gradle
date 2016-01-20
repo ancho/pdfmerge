@@ -1,10 +1,12 @@
 apply plugin: 'groovy'
 apply plugin: 'idea'
+apply plugin: 'jacoco'
+apply from: 'gradle/maven-publish.gradle'
 
 group 'de.calmdevelopment'
-version '0.1'
+version '0.1-SNAPSHOT'
 
-defaultTasks 'clean', 'build', 'eclipse'
+defaultTasks 'clean', 'build', 'idea'
 
 repositories {
 	jcenter()
@@ -15,13 +17,3 @@ dependencies {
     compile 'org.apache.pdfbox:pdfbox:2.0+'
 	testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
 }
-
-task openTestReport(type: Exec) {
-    description 'Open generated TestReport in your browser'
-    def reportDir = test.reports.html.destination
-
-    executable "/usr/bin/firefox"
-    args "file://${reportDir}/index.html"
-}
-
-
