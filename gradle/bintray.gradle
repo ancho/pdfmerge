@@ -1,0 +1,28 @@
+ext.bintrayUsername = project.hasProperty('bintrayUsername')?project.getProperty('bintrayUsername'):System.getenv('BINTRAY_USER')?:''
+ext.bintrayKey = project.hasProperty('bintrayKey')?project.getProperty('bintrayKey'):System.getenv('BINTRAY_KEY')?:''
+
+if (!project.hasProperty('bintrayUsername')) ext.bintrayUsername = ''
+if (!project.hasProperty('bintrayKey')) ext.bintrayKey = ''
+
+bintray {
+    user = bintrayUsername
+    key = bintrayKey
+    publications = ['mavenJava']
+    pkg {
+        userOrg = 'calmdev'
+        repo = 'libs'
+        name = project.name
+        desc = project.project_description
+        licenses = ['Apache-2.0']
+        labels = ['pdf', 'merge']
+        websiteUrl = project.project_website
+        issueTrackerUrl = project.project_issues
+        vcsUrl = project.project_vcs
+        publicDownloadNumbers = true
+        version {
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+            }
+        }
+    }
+}

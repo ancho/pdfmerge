@@ -1,6 +1,7 @@
 import java.text.SimpleDateFormat
 
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 def pomFile = file("gradle/pom.groovy")
 assert pomFile.exists()
@@ -65,15 +66,16 @@ jar.finalizedBy javadocJar
 jar.finalizedBy groovydocJar
 
 artifacts {
-    sourcesJar
-    javadocJar
-    groovydocJar
+    archives sourcesJar, javadocJar, groovydocJar
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
 
+            artifact sourcesJar
+            artifact javadocJar
+            artifact groovydocJar
 
             pom.withXml {
                 def rootNode = asNode()
@@ -84,6 +86,13 @@ publishing {
             from components.java
         }
     }
+}
+
+ext.isReleaseVersion =  !version.endsWith('SNAPSHOT')
+
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
 }
 
 private void addNode(config, key, Node node) {
