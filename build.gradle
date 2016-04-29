@@ -1,17 +1,22 @@
 plugins {
+    id 'net.nemerosa.versioning' version '1.7.1'
     id "com.github.hierynomus.license" version "0.12.1"
+    id "com.jfrog.bintray" version "1.6"
 }
 
 apply plugin: 'groovy'
 apply plugin: 'idea'
 apply plugin: 'jacoco'
 apply from: 'gradle/maven-publish.gradle'
+apply from: 'gradle/bintray.gradle'
 apply from: 'gradle/codequality.gradle'
 
 group 'de.calmdevelopment'
-version '0.2.0-SNAPSHOT'
 
 defaultTasks 'clean', 'build', 'idea'
+
+sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
 
 repositories {
 	jcenter()
