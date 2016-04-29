@@ -9,7 +9,7 @@ apply from: 'gradle/maven-publish.gradle'
 apply from: 'gradle/codequality.gradle'
 
 group 'de.calmdevelopment'
-version '0.1-SNAPSHOT'
+version '0.1'
 
 defaultTasks 'clean', 'build', 'idea'
 
