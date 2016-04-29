@@ -71,7 +71,7 @@ class FirstPageBookmarker implements Bookmarker{
         bookmarkClone.title = bookmark.title
         bookmarkClone.destination = bookmark.destination
         bookmarkClone.action = bookmark.action
-        bookmarkClone.structuredElement = bookmark.getStructureElement()
+        bookmarkClone.structureElement = bookmark.structureElement
         bookmarkClone.bold = bookmark.bold
         bookmarkClone.italic = bookmark.italic
         bookmarkClone.textColor = bookmark.textColor
