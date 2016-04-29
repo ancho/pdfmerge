@@ -1,14 +1,79 @@
+import java.text.SimpleDateFormat
+
 apply plugin: 'maven-publish'
 
 def pomFile = file("gradle/pom.groovy")
 assert pomFile.exists()
 def slurper = new ConfigSlurper()
-slurper.setBinding(["projectName": project.name])
+slurper.setBinding(["projectName": project.name, "projectDescription": project.description])
 def config = slurper.parse(pomFile.toURI().toURL())
+
+Date buildTimeAndDate = new Date()
+ext {
+    buildDate = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
+    buildTime = new SimpleDateFormat('HH:mm:ss.SSSZ').format(buildTimeAndDate)
+}
+
+tasks.withType(Jar) {
+    manifest {
+        attributes(
+                'Built-By': System.properties['user.name'],
+                'Created-By': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})".toString(),
+                'Build-Date': buildDate,
+                'Build-Time': buildTime,
+                'Build-Revision': versioning.info.commit,
+                'Specification-Title': project.name,
+                'Specification-Version': project.version,
+                'Specification-Vendor': project.project_vendor,
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': project.project_vendor
+        )
+    }
+}
+
+groovydoc {
+    windowTitle = "$project.name $project.version API"
+    docTitle    = "$project.name $project.version API"
+    link 'http://docs.oracle.com/javase/7/docs/api/', 'java'
+    link 'http://pdfbox.apache.org/docs/2.0.1/javadocs/', 'org.apache.pdfbox'
+}
+
+task sourcesJar(type: Jar) {
+    group 'Build'
+    description 'An archive of the source code'
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    group 'Build'
+    description 'An archive of the javadoc'
+    classifier 'javadoc'
+    from javadoc.destinationDir
+}
+
+task groovydocJar(type: Jar, dependsOn: groovydoc) {
+    group 'Build'
+    description 'An archive of the groovydoc'
+    classifier 'groovydoc'
+    from groovydoc.destinationDir
+}
+
+jar.finalizedBy sourcesJar
+jar.finalizedBy javadocJar
+jar.finalizedBy groovydocJar
+
+artifacts {
+    sourcesJar
+    javadocJar
+    groovydocJar
+}
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
+
 
             pom.withXml {
                 def rootNode = asNode()

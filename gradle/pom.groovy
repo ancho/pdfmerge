@@ -1,5 +1,7 @@
 name = "$projectName"
 
+description = "$projectDescription"
+
 developers {
     developer {
         id = "ancho"
