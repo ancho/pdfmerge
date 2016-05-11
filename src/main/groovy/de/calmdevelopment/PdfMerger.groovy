@@ -20,11 +20,21 @@ import org.apache.pdfbox.multipdf.PDFMergerUtility
 import org.apache.pdfbox.pdmodel.PDDocument
 
 class PdfMerger {
+    Config config
     List<PDDocument> sources = []
     OutputStream destination
 
+    PdfMerger() {
+        this.config = new MergeConfig()
+    }
+
+    PdfMerger(MemoryUsageSetting setting) {
+        this()
+        this.config.memoryUsageSetting = setting
+    }
+
     def addSource(InputStream sourceDocument, Bookmarker bookmarker) {
-        PDDocument document = PDDocument.load(sourceDocument)
+        PDDocument document = PDDocument.load(sourceDocument, config.memoryUsageSetting)
         bookmarker.addDocument(document)
         bookmarker.bookmark()
 
@@ -32,7 +42,7 @@ class PdfMerger {
     }
 
     def addSource(InputStream sourceDocument) {
-        PDDocument document = PDDocument.load(sourceDocument)
+        PDDocument document = PDDocument.load(sourceDocument, config.memoryUsageSetting)
         this.sources << document
     }
 
@@ -43,8 +53,9 @@ class PdfMerger {
             ByteArrayOutputStream content = new ByteArrayOutputStream()
             document.save(content)
             merger.addSource(new ByteArrayInputStream(content.toByteArray()))
+            document.close()
         }
         merger.setDestinationStream(destination)
-        merger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly())
+        merger.mergeDocuments(config.memoryUsageSetting)
     }
 }
