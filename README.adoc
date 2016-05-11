@@ -1,5 +1,8 @@
-= pdfmerge image:{travis-status-image}["Build Status",link="https://travis-ci.org/ancho/pdfmerge"]
+= pdfmerge
 :travis-status-image: https://travis-ci.org/ancho/pdfmerge.svg?branch=master
-:pdfbox-home: https://pdfbox.apache.org/ 
+:bintray-image: https://api.bintray.com/packages/calmdev/libs/pdfmerge/images/download.svg
+:pdfbox-home: https://pdfbox.apache.org/
+
+image:{travis-status-image}["Build Status",link="https://travis-ci.org/ancho/pdfmerge"] image:{bintray-image}[link="https://bintray.com/calmdev/libs/pdfmerge/_latestVersion"]
 
 A simple implementation to merge multiple PDF Documents using {pdfbox-home}[apache pdfbox].

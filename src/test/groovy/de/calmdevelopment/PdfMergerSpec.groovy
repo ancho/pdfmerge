@@ -16,6 +16,7 @@
 package de.calmdevelopment
 
 import de.calmdevelopment.helper.SampleDocumentBuilder
+import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
 import spock.lang.Specification
@@ -30,6 +31,7 @@ class PdfMergerSpec extends Specification {
     private ByteArrayOutputStream destinationStream
     private PDDocument firstDocument
     private PDDocument secondDocument
+    private PDDocument expectedDocument
     private PDDocument allpagesBookmarkedDocument
 
     def setup() {
@@ -54,8 +56,13 @@ class PdfMergerSpec extends Specification {
         allPagesOutputStream.close()
         destinationStream.close()
 
+        if ( expectedDocument ) {
+            expectedDocument.close()
+        }
+
         firstDocument.close()
         secondDocument.close()
+        allpagesBookmarkedDocument.close()
     }
 
     def "should merge documents and apply bookmarker"() {
@@ -67,9 +74,9 @@ class PdfMergerSpec extends Specification {
 
         when:
         merger.merge()
+        expectedDocument = PDDocument.load(new ByteArrayInputStream(destinationStream.toByteArray()))
 
         then:
-        def expectedDocument = PDDocument.load(new ByteArrayInputStream(destinationStream.toByteArray()))
         expectedDocument.getPages().size() == 5
 
         PDOutlineItem firstBookmark = expectedDocument.getDocumentCatalog().getDocumentOutline().getFirstChild()
@@ -87,9 +94,9 @@ class PdfMergerSpec extends Specification {
 
         when:
         merger.merge()
+        expectedDocument = PDDocument.load(new ByteArrayInputStream(destinationStream.toByteArray()))
 
         then:
-        def expectedDocument = PDDocument.load(new ByteArrayInputStream(destinationStream.toByteArray()))
         expectedDocument.getPages().size() == 10
         expectedDocument.getDocumentCatalog().documentOutline.children().size() == 6
 
@@ -98,6 +105,41 @@ class PdfMergerSpec extends Specification {
         firstChild.nextSibling.getTitle() == SECOND_DOCUMENT_TITLE
         firstChild.nextSibling.children().size() == 4
         firstChild.nextSibling.nextSibling.title == "$BOOKMARKED_PAGE_TITLE 0"
+    }
+
+    def "should use default Memory only usage setting"() {
+        given:
+        PdfMerger merger = new PdfMerger()
+
+        expect:
+        merger.config.memoryUsageSetting.useMainMemory
+        !merger.config.memoryUsageSetting.useTempFile
+    }
+
+    def "should be possible to set memory usage setting with constructor"() {
+
+        when:
+        PdfMerger merger = new PdfMerger(MemoryUsageSetting.setupTempFileOnly())
+
+        then:
+        !merger.config.memoryUsageSetting.useMainMemory
+        merger.config.memoryUsageSetting.useTempFile
+    }
+
+    def "should add blank page to documents with an odd page count"() {
+        given:
+        PdfMerger merger = new PdfMerger()
+        merger.config.insertBlankPages = true
+        merger.addSource(asInputStream(fistDocumentOutputStream), new FirstPageBookmarker(FIRST_DOCUMENT_TITLE))
+        merger.addSource(asInputStream(secondDocumentOutputStream), new FirstPageBookmarker(SECOND_DOCUMENT_TITLE))
+        merger.destination = destinationStream
+
+        when:
+        merger.merge()
+        expectedDocument = PDDocument.load(new ByteArrayInputStream(destinationStream.toByteArray()))
+
+        then:
+        expectedDocument.getPages().size() == 6
     }
 
     private ByteArrayInputStream asInputStream(ByteArrayOutputStream outputStream) {

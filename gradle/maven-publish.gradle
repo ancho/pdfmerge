@@ -6,7 +6,7 @@ apply plugin: 'signing'
 def pomFile = file("gradle/pom.groovy")
 assert pomFile.exists()
 def slurper = new ConfigSlurper()
-slurper.setBinding(["projectName": project.name, "projectDescription": project.description])
+slurper.setBinding(["projectName": project.name, "projectDescription": project.project_description])
 def config = slurper.parse(pomFile.toURI().toURL())
 
 Date buildTimeAndDate = new Date()
