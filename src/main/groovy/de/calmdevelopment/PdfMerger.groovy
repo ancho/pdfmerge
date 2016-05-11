@@ -18,10 +18,14 @@ package de.calmdevelopment
 import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDPage
+import org.apache.pdfbox.pdmodel.PDPageContentStream
+import org.apache.pdfbox.pdmodel.font.PDFont
+import org.apache.pdfbox.pdmodel.font.PDType1Font
 
 class PdfMerger {
     Config config
-    List<PDDocument> sources = []
+    def sources = []
     OutputStream destination
 
     PdfMerger() {
@@ -35,22 +39,27 @@ class PdfMerger {
 
     def addSource(InputStream sourceDocument, Bookmarker bookmarker) {
         PDDocument document = PDDocument.load(sourceDocument, config.memoryUsageSetting)
-        bookmarker.addDocument(document)
-        bookmarker.bookmark()
-
-        this.sources << document
+        this.sources << [document: document, bookmarker: bookmarker]
     }
 
     def addSource(InputStream sourceDocument) {
-        PDDocument document = PDDocument.load(sourceDocument, config.memoryUsageSetting)
-        this.sources << document
+        addSource(sourceDocument, new NoneBookmarker())
     }
 
     def merge() {
         PDFMergerUtility merger = new PDFMergerUtility()
 
-        sources.each { document ->
+        sources.each { source ->
             ByteArrayOutputStream content = new ByteArrayOutputStream()
+
+            Bookmarker bookmarker = source.bookmarker
+            PDDocument document = source.document
+
+            insertBlankPagesIfPagesCountIsOdd( document )
+
+            bookmarker.addDocument(document)
+            bookmarker.bookmark()
+
             document.save(content)
             merger.addSource(new ByteArrayInputStream(content.toByteArray()))
             document.close()
@@ -58,4 +67,30 @@ class PdfMerger {
         merger.setDestinationStream(destination)
         merger.mergeDocuments(config.memoryUsageSetting)
     }
+
+    private void insertBlankPagesIfPagesCountIsOdd(PDDocument document) {
+        if (config.insertBlankPages) {
+            if (hasOddPageCount(document)) {
+                addBlankPage(document)
+            }
+        }
+    }
+
+    private int hasOddPageCount(PDDocument document) {
+        document.getPages().size() % 2
+    }
+
+    private void addBlankPage(PDDocument document) {
+        def blankPage = new PDPage()
+        document.addPage(blankPage)
+        PDFont font = PDType1Font.HELVETICA_BOLD;
+
+        PDPageContentStream contents = new PDPageContentStream(document, blankPage);
+        contents.beginText();
+        contents.setFont(font, 12);
+        contents.showText("");
+        contents.endText();
+        contents.close();
+    }
+
 }

@@ -15,12 +15,12 @@
  */
 package de.calmdevelopment
 
-import org.apache.pdfbox.io.MemoryUsageSetting
+import org.apache.pdfbox.pdmodel.PDDocument
 
-interface Config {
-    MemoryUsageSetting getMemoryUsageSetting()
-    void setMemoryUsageSetting(MemoryUsageSetting setting)
-    boolean getInsertBlankPages()
-    void setInsertBlankPages(boolean insertBlankPages)
+class NoneBookmarker implements Bookmarker{
+    @Override
+    def bookmark() { /* does not do anything */ }
 
+    @Override
+    def addDocument(PDDocument document) { /* does not do anything */ }
 }

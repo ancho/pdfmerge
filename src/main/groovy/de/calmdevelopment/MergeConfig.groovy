@@ -19,8 +19,10 @@ import org.apache.pdfbox.io.MemoryUsageSetting
 
 class MergeConfig implements Config {
     MemoryUsageSetting memoryUsageSetting
+    boolean insertBlankPages
 
     MergeConfig() {
         this.memoryUsageSetting = MemoryUsageSetting.setupMainMemoryOnly()
+        this.insertBlankPages = false
     }
 }

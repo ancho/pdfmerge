@@ -126,6 +126,22 @@ class PdfMergerSpec extends Specification {
         merger.config.memoryUsageSetting.useTempFile
     }
 
+    def "should add blank page to documents with an odd page count"() {
+        given:
+        PdfMerger merger = new PdfMerger()
+        merger.config.insertBlankPages = true
+        merger.addSource(asInputStream(fistDocumentOutputStream), new FirstPageBookmarker(FIRST_DOCUMENT_TITLE))
+        merger.addSource(asInputStream(secondDocumentOutputStream), new FirstPageBookmarker(SECOND_DOCUMENT_TITLE))
+        merger.destination = destinationStream
+
+        when:
+        merger.merge()
+        expectedDocument = PDDocument.load(new ByteArrayInputStream(destinationStream.toByteArray()))
+
+        then:
+        expectedDocument.getPages().size() == 6
+    }
+
     private ByteArrayInputStream asInputStream(ByteArrayOutputStream outputStream) {
         new ByteArrayInputStream(outputStream.toByteArray())
     }

@@ -79,7 +79,7 @@ class PdfMergerIntegrationSpec extends Specification {
         def subBookmarkOfSecondBookmark = secondBookmark.getFirstChild()
         hasValidNumberOfChildren(subBookmarkOfSecondBookmark, 1)
 
-        merger.sources[0].document.isClosed()
+        merger.sources[0].document.document.isClosed()
 
     }
 
@@ -109,6 +109,34 @@ class PdfMergerIntegrationSpec extends Specification {
 
         then:
         1 * mockConfig.getMemoryUsageSetting()
+    }
+
+    def "should add blank page to documents with odd page count"() {
+        firstDocument = SampleDocumentBuilder.createDocument("First Documemt", 3)
+
+        File firstFile = folder.newFile("firstDocument.pdf")
+        File allpagesFile = folder.newFile("allPages.pdf")
+        File destination = folder.newFile("destination.pdf")
+        destination.exists() == false
+
+        firstDocument.save(firstFile)
+        allpagesBookmarkedDocument.save(allpagesFile)
+
+        PdfMerger merger = new PdfMerger()
+        merger.config.insertBlankPages = true
+
+        merger.addSource(new FileInputStream(firstFile), new FirstPageBookmarker("First Document"))
+        merger.addSource(new FileInputStream(allpagesFile), new FirstPageBookmarker("Second Document"))
+        merger.destination = new FileOutputStream(destination)
+
+        when:
+        merger.merge()
+        document = PDDocument.load(new FileInputStream(destination))
+
+        then:
+        document.pages.count == 8
+
+        document.save(new File("/tmp/blankpages.pdf"))
     }
 
     private boolean hasValidNumberOfChildren(PDOutlineNode node, expectedSize) {
