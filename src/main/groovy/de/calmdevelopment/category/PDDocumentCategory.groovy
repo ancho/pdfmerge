@@ -22,7 +22,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 
 /**
- * Apply an appendBlankPage method to a {@link org.apache.pdfbox.pdmodel.PDDocument}:
+ * Apply custom methods to a {@link PDDocument}:
  * <pre>
  * PDDocument document = PDDocument.load("/path/to/some.pdf")
  *
@@ -32,7 +32,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font
  *
  *      // append a blank page only if page count is odd
  *      document.appendBlankPage() {
- *          document.pages.size() % 2
+ *          document.hasOddPageCount()
  *      }
  * }
  * </pre>
@@ -43,7 +43,7 @@ class PDDocumentCategory {
     /**
      * Append a blank page to a {@link PDDocument} instance
      *
-     * @param condition An optional boolean condition whether to append the blank page or not
+     * @param condition An optional boolean condition closure whether to append the blank page or not
      */
     void appendBlankPage(Closure<Boolean> condition){
 
@@ -66,5 +66,13 @@ class PDDocumentCategory {
             contents.endText();
             contents.close();
         }
+    }
+
+    /**
+     * Has a {@link PDDocument} an odd number of pages
+     * @return {@code true} if number of pages is odd otherwise {@code false}
+     */
+    boolean hasOddPageCount() {
+        this.pages.size() % 2
     }
 }

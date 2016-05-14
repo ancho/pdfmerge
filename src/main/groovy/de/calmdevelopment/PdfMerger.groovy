@@ -71,7 +71,7 @@ class PdfMerger {
 
         use(PDDocumentCategory) {
             document.appendBlankPage() {
-                config.insertBlankPages && (document.getPages().size() % 2)
+                config.insertBlankPages && document.hasOddPageCount()
             }
         }
 
