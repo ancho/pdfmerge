@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.6.3'
+    }
+}
+
 plugins {
     id 'net.nemerosa.versioning' version '1.7.1'
     id "com.github.hierynomus.license" version "0.12.1"
@@ -7,6 +16,7 @@ plugins {
 apply plugin: 'groovy'
 apply plugin: 'idea'
 apply plugin: 'jacoco'
+apply plugin: 'com.github.kt3k.coveralls'
 apply from: 'gradle/maven-publish.gradle'
 apply from: 'gradle/bintray.gradle'
 apply from: 'gradle/codequality.gradle'
@@ -27,3 +37,12 @@ dependencies {
     compile 'org.apache.pdfbox:pdfbox:2.0+'
 	testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = true
+    }
+}
+
+jacocoTestReport.dependsOn test
