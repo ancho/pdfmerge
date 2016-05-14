@@ -128,7 +128,7 @@ class PdfMerger {
                 }
             }
             else {
-                throw new IllegalStateException("A minimum of two sources files are required to merge.")
+                throw new IllegalStateException("A minimum of two source files are required to merge.")
             }
 
             merger.setDestinationStream(destination)

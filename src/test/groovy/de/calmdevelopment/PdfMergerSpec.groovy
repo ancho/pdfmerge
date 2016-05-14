@@ -165,7 +165,7 @@ class PdfMergerSpec extends Specification {
 
         then:
         def e = thrown(IllegalStateException)
-        e.message == "A minimum of two sources files are required to merge."
+        e.message == "A minimum of two source files are required to merge."
 
     }
 
