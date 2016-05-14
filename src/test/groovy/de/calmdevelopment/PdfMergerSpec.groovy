@@ -15,6 +15,7 @@
  */
 package de.calmdevelopment
 
+import de.calmdevelopment.bookmark.FirstPageBookmarker
 import de.calmdevelopment.helper.SampleDocumentBuilder
 import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.pdmodel.PDDocument

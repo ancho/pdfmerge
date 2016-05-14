@@ -15,6 +15,8 @@
  */
 package de.calmdevelopment
 
+import de.calmdevelopment.bookmark.Bookmarker
+import de.calmdevelopment.bookmark.FirstPageBookmarker
 import de.calmdevelopment.helper.SampleDocumentBuilder
 import org.apache.pdfbox.pdmodel.PDDocument
 import spock.lang.Specification

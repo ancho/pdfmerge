@@ -15,13 +15,12 @@
  */
 package de.calmdevelopment
 
+import de.calmdevelopment.bookmark.Bookmarker
+import de.calmdevelopment.bookmark.NoneBookmarker
+import de.calmdevelopment.category.PDDocumentCategory
 import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.PDPage
-import org.apache.pdfbox.pdmodel.PDPageContentStream
-import org.apache.pdfbox.pdmodel.font.PDFont
-import org.apache.pdfbox.pdmodel.font.PDType1Font
 
 class PdfMerger {
     Config config
@@ -69,28 +68,13 @@ class PdfMerger {
     }
 
     private void insertBlankPagesIfPagesCountIsOdd(PDDocument document) {
-        if (config.insertBlankPages) {
-            if (hasOddPageCount(document)) {
-                addBlankPage(document)
+
+        use(PDDocumentCategory) {
+            document.appendBlankPage() {
+                config.insertBlankPages && (document.getPages().size() % 2)
             }
         }
-    }
 
-    private int hasOddPageCount(PDDocument document) {
-        document.getPages().size() % 2
-    }
-
-    private void addBlankPage(PDDocument document) {
-        def blankPage = new PDPage()
-        document.addPage(blankPage)
-        PDFont font = PDType1Font.HELVETICA_BOLD;
-
-        PDPageContentStream contents = new PDPageContentStream(document, blankPage);
-        contents.beginText();
-        contents.setFont(font, 12);
-        contents.showText("");
-        contents.endText();
-        contents.close();
     }
 
 }
