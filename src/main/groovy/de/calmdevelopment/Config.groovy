@@ -22,5 +22,4 @@ interface Config {
     void setMemoryUsageSetting(MemoryUsageSetting setting)
     boolean getInsertBlankPages()
     void setInsertBlankPages(boolean insertBlankPages)
-
 }

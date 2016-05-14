@@ -15,6 +15,7 @@
  */
 package de.calmdevelopment
 
+import de.calmdevelopment.bookmark.FirstPageBookmarker
 import de.calmdevelopment.helper.SampleDocumentBuilder
 import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -140,6 +141,32 @@ class PdfMergerSpec extends Specification {
 
         then:
         expectedDocument.getPages().size() == 6
+    }
+
+    def "should throw an exception if destination is not given"() {
+        given:
+        PdfMerger merger = new PdfMerger()
+
+        when:
+        merger.merge()
+
+        then:
+        def e = thrown(IllegalStateException)
+        e.message == "The destination for the merged documents is undefined."
+    }
+
+    def "should throw an exception if no source files given"() {
+        given:
+        PdfMerger merger = new PdfMerger()
+        merger.destination = destinationStream
+
+        when:
+        merger.merge()
+
+        then:
+        def e = thrown(IllegalStateException)
+        e.message == "A minimum of two source files are required to merge."
+
     }
 
     private ByteArrayInputStream asInputStream(ByteArrayOutputStream outputStream) {

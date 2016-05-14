@@ -15,82 +15,138 @@
  */
 package de.calmdevelopment
 
+import de.calmdevelopment.bookmark.Bookmarker
+import de.calmdevelopment.bookmark.NoneBookmarker
+import de.calmdevelopment.category.PDDocumentCategory
 import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.PDPage
-import org.apache.pdfbox.pdmodel.PDPageContentStream
-import org.apache.pdfbox.pdmodel.font.PDFont
-import org.apache.pdfbox.pdmodel.font.PDType1Font
 
+/**
+ * Merge a given set of pdf documents to a new pdf destination
+ */
 class PdfMerger {
+    /**
+     * The configuration
+     */
     Config config
+
+    /**
+     * A map of source files with the Bookmarker to apply to
+     * <pre>
+     *     [[document: doc, bookmarker: bookmarker], ...]
+     * </pre>
+     */
     def sources = []
+
+    /**
+     * The destination OutputStream
+     */
     OutputStream destination
 
+    /**
+     * Construct a PdfMerger instance with a {@link MergeConfig} as configuration
+     */
     PdfMerger() {
         this.config = new MergeConfig()
     }
 
+    /**
+     * Construct a PdfMerger instance
+     *
+     * Adds the {@link MemoryUsageSetting} to the configuration
+     * @param setting
+     */
     PdfMerger(MemoryUsageSetting setting) {
         this()
         this.config.memoryUsageSetting = setting
     }
 
+    /**
+     * Add a source pdf document with a {@link Bookmarker} to apply to the list of source files
+     *
+     * @param sourceDocument An inputstream to the source pdf document
+     * @param bookmarker A {@link Bookmarker} to apply to the sourceDocument
+     */
     def addSource(InputStream sourceDocument, Bookmarker bookmarker) {
         PDDocument document = PDDocument.load(sourceDocument, config.memoryUsageSetting)
         this.sources << [document: document, bookmarker: bookmarker]
     }
 
+    /**
+     * Add a source pdf document to the list of source files.
+     * <p>
+     *     Applies a {@link NoneBookmarker} to the given sourceDocument.
+     * </p>
+     * @param sourceDocument An inputstream to the source pdf document
+     */
     def addSource(InputStream sourceDocument) {
         addSource(sourceDocument, new NoneBookmarker())
     }
 
-    def merge() {
-        PDFMergerUtility merger = new PDFMergerUtility()
+    /**
+     * merge a set of given source files to the destination file.
+     * <p>
+     *     <ul>
+     *          <li>Applies given {@link Bookmarker} to the source files.</li>
+     *          <li>Applies configured {@link MemoryUsageSetting} </li>
+     *     </ul>
+     * </p>
+     *
+     * <p>
+     *     Inserts a blank Page to documents with an odd number of pages if {@code insertBlankPages}
+     *     is configured.
+     *
+     *     <pre>
+     *         PdfMerger merger = new PdfMerger()
+     *         merger.config.insertBlankPages = true
+     *     </pre>
+     * </p>
+     *
+     * @throws IllegalStateException If no destination file is configured or source files are less then two
+     */
+    def merge() throws IllegalStateException {
 
-        sources.each { source ->
-            ByteArrayOutputStream content = new ByteArrayOutputStream()
+        if( destination ) {
+            PDFMergerUtility merger = new PDFMergerUtility()
 
-            Bookmarker bookmarker = source.bookmarker
-            PDDocument document = source.document
+            if ( sources.size() > 1 ) {
+                sources.each { source ->
+                    ByteArrayOutputStream content = new ByteArrayOutputStream()
 
-            insertBlankPagesIfPagesCountIsOdd( document )
+                    Bookmarker bookmarker = source.bookmarker
+                    PDDocument document = source.document
 
-            bookmarker.addDocument(document)
-            bookmarker.bookmark()
+                    insertBlankPagesIfPagesCountIsOdd(document)
 
-            document.save(content)
-            merger.addSource(new ByteArrayInputStream(content.toByteArray()))
-            document.close()
+                    bookmarker.addDocument(document)
+                    bookmarker.bookmark()
+
+                    document.save(content)
+                    merger.addSource(new ByteArrayInputStream(content.toByteArray()))
+                    document.close()
+                }
+            }
+            else {
+                throw new IllegalStateException("A minimum of two source files are required to merge.")
+            }
+
+            merger.setDestinationStream(destination)
+            merger.mergeDocuments(config.memoryUsageSetting)
         }
-        merger.setDestinationStream(destination)
-        merger.mergeDocuments(config.memoryUsageSetting)
+        else {
+            throw new IllegalStateException("The destination for the merged documents is undefined.")
+        }
     }
 
     private void insertBlankPagesIfPagesCountIsOdd(PDDocument document) {
-        if (config.insertBlankPages) {
-            if (hasOddPageCount(document)) {
-                addBlankPage(document)
+
+        use(PDDocumentCategory) {
+            document.appendBlankPage() {
+                config.insertBlankPages && document.hasOddPageCount()
             }
         }
-    }
 
-    private int hasOddPageCount(PDDocument document) {
-        document.getPages().size() % 2
-    }
-
-    private void addBlankPage(PDDocument document) {
-        def blankPage = new PDPage()
-        document.addPage(blankPage)
-        PDFont font = PDType1Font.HELVETICA_BOLD;
-
-        PDPageContentStream contents = new PDPageContentStream(document, blankPage);
-        contents.beginText();
-        contents.setFont(font, 12);
-        contents.showText("");
-        contents.endText();
-        contents.close();
     }
 
 }

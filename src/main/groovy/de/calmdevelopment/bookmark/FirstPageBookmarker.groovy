@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.calmdevelopment
+package de.calmdevelopment.bookmark
 
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitWidthDestination
@@ -21,6 +21,12 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocume
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode
 
+/**
+ * Adds a new Bookmark with the given Title to the first Page of the given Document.
+ * <p>
+ *     It appends the original outline to the new bookmark
+ * </p>
+ */
 class FirstPageBookmarker implements Bookmarker{
     PDDocument document
     def bookmarkTitle

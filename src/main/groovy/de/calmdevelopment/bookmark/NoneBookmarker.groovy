@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.calmdevelopment
+package de.calmdevelopment.bookmark
 
 import org.apache.pdfbox.pdmodel.PDDocument
 
+/**
+ * This is a Dummy Bookmarker. It does nothing.
+ */
 class NoneBookmarker implements Bookmarker{
     @Override
     def bookmark() { /* does not do anything */ }
