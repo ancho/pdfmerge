@@ -1,8 +1,13 @@
 = pdfmerge
 :travis-status-image: https://travis-ci.org/ancho/pdfmerge.svg?branch=master
 :bintray-image: https://api.bintray.com/packages/calmdev/libs/pdfmerge/images/download.svg
+:coveralls-image: https://coveralls.io/repos/github/ancho/pdfmerge/badge.svg?branch=master
+:gitter-image: https://badges.gitter.im/ancho/pdfmerge.svg
 :pdfbox-home: https://pdfbox.apache.org/
 
-image:{travis-status-image}["Build Status",link="https://travis-ci.org/ancho/pdfmerge"] image:{bintray-image}[link="https://bintray.com/calmdev/libs/pdfmerge/_latestVersion"]
+image:{travis-status-image}["Build Status",link="https://travis-ci.org/ancho/pdfmerge"]
+image:{coveralls-image}[link="https://coveralls.io/github/ancho/pdfmerge?branch=master"]
+image:{bintray-image}[link="https://bintray.com/calmdev/libs/pdfmerge/_latestVersion"]
+image:{gitter-image}[link="https://gitter.im/ancho/pdfmerge?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 
 A simple implementation to merge multiple PDF Documents using {pdfbox-home}[apache pdfbox].
