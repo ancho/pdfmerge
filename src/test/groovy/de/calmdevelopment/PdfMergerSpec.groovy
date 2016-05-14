@@ -143,6 +143,18 @@ class PdfMergerSpec extends Specification {
         expectedDocument.getPages().size() == 6
     }
 
+    def "should throw an exception if destination is not given"() {
+        given:
+        PdfMerger merger = new PdfMerger()
+
+        when:
+        merger.merge()
+
+        then:
+        def e = thrown(IllegalStateException)
+        e.message == "The destination for the merged documents is undefined."
+    }
+
     private ByteArrayInputStream asInputStream(ByteArrayOutputStream outputStream) {
         new ByteArrayInputStream(outputStream.toByteArray())
     }

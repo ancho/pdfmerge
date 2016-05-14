@@ -46,25 +46,31 @@ class PdfMerger {
     }
 
     def merge() {
-        PDFMergerUtility merger = new PDFMergerUtility()
 
-        sources.each { source ->
-            ByteArrayOutputStream content = new ByteArrayOutputStream()
+        if( destination ) {
+            PDFMergerUtility merger = new PDFMergerUtility()
 
-            Bookmarker bookmarker = source.bookmarker
-            PDDocument document = source.document
+            sources.each { source ->
+                ByteArrayOutputStream content = new ByteArrayOutputStream()
 
-            insertBlankPagesIfPagesCountIsOdd( document )
+                Bookmarker bookmarker = source.bookmarker
+                PDDocument document = source.document
 
-            bookmarker.addDocument(document)
-            bookmarker.bookmark()
+                insertBlankPagesIfPagesCountIsOdd(document)
 
-            document.save(content)
-            merger.addSource(new ByteArrayInputStream(content.toByteArray()))
-            document.close()
+                bookmarker.addDocument(document)
+                bookmarker.bookmark()
+
+                document.save(content)
+                merger.addSource(new ByteArrayInputStream(content.toByteArray()))
+                document.close()
+            }
+            merger.setDestinationStream(destination)
+            merger.mergeDocuments(config.memoryUsageSetting)
         }
-        merger.setDestinationStream(destination)
-        merger.mergeDocuments(config.memoryUsageSetting)
+        else {
+            throw new IllegalStateException("The destination for the merged documents is undefined.")
+        }
     }
 
     private void insertBlankPagesIfPagesCountIsOdd(PDDocument document) {
