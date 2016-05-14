@@ -15,9 +15,11 @@
  */
 package de.calmdevelopment.bookmark
 
-import de.calmdevelopment.bookmark.Bookmarker
 import org.apache.pdfbox.pdmodel.PDDocument
 
+/**
+ * This is a Dummy Bookmarker. It does nothing.
+ */
 class NoneBookmarker implements Bookmarker{
     @Override
     def bookmark() { /* does not do anything */ }
