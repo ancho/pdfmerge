@@ -155,6 +155,20 @@ class PdfMergerSpec extends Specification {
         e.message == "The destination for the merged documents is undefined."
     }
 
+    def "should throw an exception if no source files given"() {
+        given:
+        PdfMerger merger = new PdfMerger()
+        merger.destination = destinationStream
+
+        when:
+        merger.merge()
+
+        then:
+        def e = thrown(IllegalStateException)
+        e.message == "A minimum of two sources files are required to merge."
+
+    }
+
     private ByteArrayInputStream asInputStream(ByteArrayOutputStream outputStream) {
         new ByteArrayInputStream(outputStream.toByteArray())
     }

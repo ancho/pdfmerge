@@ -50,21 +50,27 @@ class PdfMerger {
         if( destination ) {
             PDFMergerUtility merger = new PDFMergerUtility()
 
-            sources.each { source ->
-                ByteArrayOutputStream content = new ByteArrayOutputStream()
+            if ( sources.size() > 1 ) {
+                sources.each { source ->
+                    ByteArrayOutputStream content = new ByteArrayOutputStream()
 
-                Bookmarker bookmarker = source.bookmarker
-                PDDocument document = source.document
+                    Bookmarker bookmarker = source.bookmarker
+                    PDDocument document = source.document
 
-                insertBlankPagesIfPagesCountIsOdd(document)
+                    insertBlankPagesIfPagesCountIsOdd(document)
 
-                bookmarker.addDocument(document)
-                bookmarker.bookmark()
+                    bookmarker.addDocument(document)
+                    bookmarker.bookmark()
 
-                document.save(content)
-                merger.addSource(new ByteArrayInputStream(content.toByteArray()))
-                document.close()
+                    document.save(content)
+                    merger.addSource(new ByteArrayInputStream(content.toByteArray()))
+                    document.close()
+                }
             }
+            else {
+                throw new IllegalStateException("A minimum of two sources files are required to merge.")
+            }
+
             merger.setDestinationStream(destination)
             merger.mergeDocuments(config.memoryUsageSetting)
         }
